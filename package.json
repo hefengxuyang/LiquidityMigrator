@@ -1,0 +1,8 @@
+{
+  "name": "LiquidityMigrator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/hefengxuyang/LiquidityMigrator.git",
+  "author": "hefengxuyang <hefengxuyang@163.com>",
+  "license": "MIT"
+}
