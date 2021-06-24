@@ -13,7 +13,7 @@ contract FundMigrator {
 
     address public governance;
 
-    uint256 private desiredRate;
+    uint256 private desiredRate = 900;
     uint256 constant private desiredDenominator=1000;
 
     event DesiredRateSet(uint256 _rate);
@@ -29,11 +29,17 @@ contract FundMigrator {
         _;
     }
 
+    // 设置容忍的流动性迁移误差比例（即分子占比，分母固定为1000）
     function setDesiredRate(uint256 _rate) external onlyGovernance {
         require(_rate != desiredRate, "This is already the current swap desired rate.");
         require(_rate <= desiredDenominator, "The swap desired rate cannot be greater than 100%.");
         desiredRate = _rate;
         emit DesiredRateSet(_rate);
+    }
+
+    // 获取容忍的流动性迁移误差比例
+    function getDesiredRate() public view returns(uint256) {
+        return desiredRate;
     }
 
     // 提取LP代币

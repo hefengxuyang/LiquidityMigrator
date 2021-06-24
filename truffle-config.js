@@ -1,3 +1,5 @@
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -72,6 +74,23 @@ module.exports = {
     // network_id: 2111,   // This network is yours, in the cloud.
     // production: true    // Treats this network as if it was a public net. (default: false)
     // }
+    
+    bsctestnet: {
+      // provider: function () {
+      //   return new HDWalletProvider(process.env.PRIVATE_KEY, "https://data-seed-prebsc-1-s1.binance.org:8545/");
+      // },
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, "https://data-seed-prebsc-1-s1.binance.org:8545/"),
+      network_id: 97,
+      networkCheckTimeout: 100000000
+    },
+    bsctest: {
+      networkCheckTimeout: 100000000, 
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, `https://data-seed-prebsc-1-s1.binance.org:8545/`),
+      network_id: 97,
+      confirmations: 10,
+      timeoutBlocks: 2000,
+      skipDryRun: true
+    }
   },
 
   // Set default mocha options here, use special reporters etc.
