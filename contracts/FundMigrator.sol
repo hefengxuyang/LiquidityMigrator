@@ -12,9 +12,7 @@ contract FundMigrator {
     using SafeMath for uint256;
 
     address public governance;
-
-    uint256 private desiredRate = 900;
-    uint256 constant private desiredDenominator=1000;
+    uint256 private desiredRate;
 
     event DesiredRateSet(uint256 _rate);
     event Split(uint256 _amountA, uint256 _amountB, uint256 _liquidity);
@@ -32,7 +30,7 @@ contract FundMigrator {
     // 设置容忍的流动性迁移误差比例（即分子占比，分母固定为1000）
     function setDesiredRate(uint256 _rate) external onlyGovernance {
         require(_rate != desiredRate, "This is already the current swap desired rate.");
-        require(_rate <= desiredDenominator, "The swap desired rate cannot be greater than 100%.");
+        require(_rate <= 1e18, "The swap desired rate cannot be greater than 100%.");
         desiredRate = _rate;
         emit DesiredRateSet(_rate);
     }
@@ -71,8 +69,8 @@ contract FundMigrator {
         uint256 _amountBDesired,
         uint256 _deadline) internal returns (uint256 amountA, uint256 amountB, uint256 liquidity) {
         require(_router != address(0), "Invalid liquity factory contract.");
-        uint256 amountADesired = _amountADesired.mul(desiredRate).div(desiredDenominator);
-        uint256 amountBDesired = _amountBDesired.mul(desiredRate).div(desiredDenominator);
+        uint256 amountADesired = _amountADesired.mul(desiredRate).div(1e18);
+        uint256 amountBDesired = _amountBDesired.mul(desiredRate).div(1e18);
         (amountA, amountB, liquidity) = ISwapV2Router(_router).addLiquidity(
             _tokenA,
             _tokenB,
