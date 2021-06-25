@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0;
 
-import './lib/SafeMath.sol';
+import "@openzeppelin/contracts/math/SafeMath.sol";
+
 import './interfaces/ISwapV2Router.sol';
 
 /**
