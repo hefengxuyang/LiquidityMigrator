@@ -121,5 +121,9 @@ module.exports = {
 
   db: {
     enabled: false
-  }
+  },
+
+  plugins: [
+    'truffle-contract-size'
+  ]
 };
