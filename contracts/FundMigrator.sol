@@ -61,20 +61,8 @@ contract FundMigrator {
         require(_router != address(0), "Invalid liquity factory contract.");
         address factory = ISwapV2Router(_router).factory();
         address pair = ISwapV2Factory(factory).getPair(_tokenA, _tokenB);
-
-        // require(ISwapV2Pair(pair).transferFrom(msg.sender, pair, _liquidity), 'TRANSFER_FROM_FAILED');
         ISwapV2Pair(pair).transferFrom(msg.sender, pair, _liquidity);
         (amountA, amountB) = ISwapV2Pair(pair).burn(address(this));
-
-        // (amountA, amountB) = ISwapV2Router(_router).removeLiquidity(
-        //     _tokenA,
-        //     _tokenB,
-        //     _liquidity,
-        //     0,
-        //     0,
-        //     msg.sender,
-        //     _deadline
-        // );
         emit Split(amountA, amountB, _liquidity);
     }
     
