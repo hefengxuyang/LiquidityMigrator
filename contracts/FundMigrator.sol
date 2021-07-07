@@ -3,7 +3,11 @@ pragma solidity >=0.6.2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
+import './interfaces/ISwapV2Factory.sol';
+import './interfaces/ISwapV2Pair.sol';
 import './interfaces/ISwapV2Router.sol';
+import './lib/TransferHelper.sol';
+
 
 /**
  * @title FundMigrator
@@ -41,23 +45,36 @@ contract FundMigrator {
         return desiredRate;
     }
 
+    // token地址排序
+    function sortTokens(address _tokenA, address _tokenB) internal pure returns (address token0, address token1) {
+        require(_tokenA != _tokenB, 'BakerySwapLibrary: IDENTICAL_ADDRESSES');
+        (token0, token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
+        require(token0 != address(0), 'BakerySwapLibrary: ZERO_ADDRESS');
+    }
+
     // 提取LP代币
     function split(
         address _router, 
         address _tokenA, 
         address _tokenB, 
-        uint256 _liquidity,
-        uint256 _deadline) internal returns (uint256 amountA, uint256 amountB) {
+        uint256 _liquidity) internal returns (uint256 amountA, uint256 amountB) {
         require(_router != address(0), "Invalid liquity factory contract.");
-        (amountA, amountB) = ISwapV2Router(_router).removeLiquidity(
-            _tokenA,
-            _tokenB,
-            _liquidity,
-            0,
-            0,
-            msg.sender,
-            _deadline
-        );
+        address factory = ISwapV2Router(_router).factory();
+        address pair = ISwapV2Factory(factory).getPair(_tokenA, _tokenB);
+
+        // require(ISwapV2Pair(pair).transferFrom(msg.sender, pair, _liquidity), 'TRANSFER_FROM_FAILED');
+        ISwapV2Pair(pair).transferFrom(msg.sender, pair, _liquidity);
+        (amountA, amountB) = ISwapV2Pair(pair).burn(address(this));
+
+        // (amountA, amountB) = ISwapV2Router(_router).removeLiquidity(
+        //     _tokenA,
+        //     _tokenB,
+        //     _liquidity,
+        //     0,
+        //     0,
+        //     msg.sender,
+        //     _deadline
+        // );
         emit Split(amountA, amountB, _liquidity);
     }
     
@@ -72,6 +89,8 @@ contract FundMigrator {
         require(_router != address(0), "Invalid liquity factory contract.");
         uint256 amountADesired = _amountADesired.mul(desiredRate).div(1e18);
         uint256 amountBDesired = _amountBDesired.mul(desiredRate).div(1e18);
+        TransferHelper.safeApprove(_tokenA, _router, amountADesired);
+        TransferHelper.safeApprove(_tokenB, _router, amountBDesired);
         (amountA, amountB, liquidity) = ISwapV2Router(_router).addLiquidity(
             _tokenA,
             _tokenB,
@@ -91,23 +110,22 @@ contract FundMigrator {
         address _newRouter, 
         address _tokenA, 
         address _tokenB, 
-        uint256 _oldLiquidity,
-        uint256 _deadline) external returns (uint256, uint256, uint256) {
+        uint256 _oldLiquidity) external returns (uint256, uint256, uint256) {
+        (address token0, address token1) = sortTokens(_tokenA, _tokenB);
         (uint256 amountA, uint256 amountB) = split(
             _oldRouter,
-            _tokenA,
-            _tokenB,
-            _oldLiquidity,
-            _deadline
+            token0,
+            token1,
+            _oldLiquidity
         );
 
         (uint256 newAmountA, uint256 newAmountB, uint256 newLiquidity) = compose(
             _newRouter,
-            _tokenA,
-            _tokenB,
+            token0,
+            token1,
             amountA,
             amountB,
-            _deadline
+            uint256(-1)
         );
 
         uint256 remainAmountA = newAmountA > amountA ? newAmountA.sub(amountA) : amountA.sub(newAmountA);
