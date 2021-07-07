@@ -94,10 +94,10 @@ contract FundMigrator {
         (amountA, amountB, liquidity) = ISwapV2Router(_router).addLiquidity(
             _tokenA,
             _tokenB,
+            _amountADesired,
+            _amountBDesired,
             amountADesired,
             amountBDesired,
-            0,
-            0,
             msg.sender,
             _deadline
         ); 
