@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-
 import './interfaces/ISwapV2Factory.sol';
 import './interfaces/ISwapV2Pair.sol';
 import './interfaces/ISwapV2Router.sol';
 import './lib/TransferHelper.sol';
-
+import './lib/SafeMath.sol';
 
 /**
  * @title FundMigrator
