@@ -95,7 +95,7 @@ contract FundMigrator {
         address _tokenA, 
         address _tokenB, 
         uint256 _oldLiquidity,
-        uint256 _deadline) external {
+        uint256 _deadline) external returns (uint256) {
         require(_oldRouter != address(0) && _newRouter != address(0), "ZERO_ADDRESS_FOR_ROUTER");
         (address tokenA, address tokenB) = sortTokens(_tokenA, _tokenB);
         (uint256 amountA, uint256 amountB) = split(
@@ -104,8 +104,7 @@ contract FundMigrator {
             tokenB,
             _oldLiquidity
         );
-
-        (uint256 newAmountA, uint256 newAmountB,) = compose(
+        (uint256 newAmountA, uint256 newAmountB, uint256 newLiquidity) = compose(
             _newRouter,
             tokenA,
             tokenB,
@@ -113,7 +112,6 @@ contract FundMigrator {
             amountB,
             _deadline
         );
-
         if (amountA > newAmountA) {
             TransferHelper.safeApprove(tokenA, _newRouter, 0); // be a good blockchain citizen, reset allowance to 0
             TransferHelper.safeTransfer(tokenA, msg.sender, amountA - newAmountA);
@@ -121,5 +119,6 @@ contract FundMigrator {
             TransferHelper.safeApprove(tokenB, _newRouter, 0);
             TransferHelper.safeTransfer(tokenB, msg.sender, amountB - newAmountB);
         }
+        return newLiquidity;
     }
 }
