@@ -45,11 +45,11 @@ contract FundMigrator {
         return desiredRate;
     }
 
-    // token地址排序
+    // token代币地址排序
     function sortTokens(address _tokenA, address _tokenB) internal pure returns (address token0, address token1) {
-        require(_tokenA != _tokenB, 'BakerySwapLibrary: IDENTICAL_ADDRESSES');
+        require(_tokenA != _tokenB, 'Identical address');
         (token0, token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
-        require(token0 != address(0), 'BakerySwapLibrary: ZERO_ADDRESS');
+        require(token0 != address(0), 'Zero address');
     }
 
     // 提取LP代币
@@ -58,7 +58,6 @@ contract FundMigrator {
         address _tokenA, 
         address _tokenB, 
         uint256 _liquidity) internal returns (uint256 amountA, uint256 amountB) {
-        require(_router != address(0), "Invalid liquity factory contract.");
         address factory = ISwapV2Router(_router).factory();
         address pair = ISwapV2Factory(factory).getPair(_tokenA, _tokenB);
         ISwapV2Pair(pair).transferFrom(msg.sender, pair, _liquidity);
@@ -74,7 +73,6 @@ contract FundMigrator {
         uint256 _amountADesired,
         uint256 _amountBDesired,
         uint256 _deadline) internal returns (uint256 amountA, uint256 amountB, uint256 liquidity) {
-        require(_router != address(0), "Invalid liquity factory contract.");
         uint256 amountADesired = _amountADesired.mul(desiredRate).div(1e18);
         uint256 amountBDesired = _amountBDesired.mul(desiredRate).div(1e18);
         TransferHelper.safeApprove(_tokenA, _router, amountADesired);
@@ -98,7 +96,9 @@ contract FundMigrator {
         address _newRouter, 
         address _tokenA, 
         address _tokenB, 
-        uint256 _oldLiquidity) external returns (uint256, uint256, uint256) {
+        uint256 _oldLiquidity,
+        uint256 _deadline) external returns (uint256, uint256, uint256) {
+        require(_oldRouter != address(0) && _newRouter != address(0), "Invalid liquity router contract.");
         (address token0, address token1) = sortTokens(_tokenA, _tokenB);
         (uint256 amountA, uint256 amountB) = split(
             _oldRouter,
@@ -113,6 +113,7 @@ contract FundMigrator {
             token1,
             amountA,
             amountB,
+            // _deadline
             uint256(-1)
         );
 
