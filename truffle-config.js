@@ -86,6 +86,7 @@ module.exports = {
     bsctest: {
       networkCheckTimeout: 100000000, 
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, `https://data-seed-prebsc-1-s1.binance.org:8545/`),
+      // provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, `wss://data-seed-prebsc-1-s1.binance.org:8545`),
       network_id: 97,
       confirmations: 10,
       timeoutBlocks: 2000,
@@ -105,10 +106,10 @@ module.exports = {
       docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
        optimizer: {
-         enabled: false,
+         enabled: true,
          runs: 200
        },
-       evmVersion: "constantinople"
+       evmVersion: "istanbul"
       }
     }
   },
